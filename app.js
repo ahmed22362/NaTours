@@ -1,4 +1,5 @@
 /* eslint-disable n/no-path-concat */
+const path = require('path');
 const express = require('express');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
@@ -16,8 +17,13 @@ const reviewRouter = require('./routes/reviewRoutes');
 
 const app = express();
 
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'views'));
+
 // 1) GLOBAL MIDDLEWARE
 
+// Serving static files
+app.use(express.static(path.join(__dirname, '/public')));
 // Set security headers
 app.use(helmet());
 
@@ -25,6 +31,13 @@ app.use(helmet());
 if (process.env.NODE_ENV.trim() === 'development') {
   app.use(morgan('dev'));
 }
+
+app.get('/', (req, res) => {
+  res.status(200).render('base', {
+    tour: 'Tour num 1',
+    author: 'Jonson',
+  });
+});
 
 // Body parser, reading data from body into req.body
 app.use(express.json());
@@ -37,9 +50,6 @@ app.use(mongoSanitize());
 
 // Data sanitization against XSS
 app.use(xss());
-
-// Serving static files
-app.use(express.static(`${__dirname}/public`));
 
 // Prevent parameter pollution
 app.use(
@@ -72,7 +82,6 @@ app.use('/api', limiter);
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
 app.use('/api/v1/reviews', reviewRouter);
-
 app.all('*', (req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} in this server`, 404));
 });

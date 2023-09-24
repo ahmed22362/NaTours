@@ -52,7 +52,7 @@ exports.getOne = (Model, popOptions) =>
     res.status(200).json({
       status: 'success',
       data: {
-        data: doc,
+        doc,
       },
     });
   });
@@ -75,7 +75,7 @@ exports.getAll = (Model) =>
       status: 'success',
       results: doc.length,
       data: {
-        data: doc,
+        docs: doc,
       },
     });
   });
